@@ -56,15 +56,40 @@ Check API status and supported formats.
 
 ## Deployment
 
-### Railway
+### Railway Deployment
 
-1. Push to GitHub
-2. Connect repository to Railway
-3. Deploy automatically
+1. **Push to GitHub:**
+   ```bash
+   cd backend
+   git init
+   git add .
+   git commit -m "Initial backend commit"
+   git remote add origin <your-github-repo-url>
+   git push -u origin main
+   ```
+
+2. **Deploy to Railway:**
+   - Go to [railway.app](https://railway.app)
+   - Click "New Project"
+   - Select "Deploy from GitHub repo"
+   - Choose your repository
+   - Railway will auto-detect Node.js and deploy
+
+3. **Get your API URL:**
+   - After deployment, Railway will provide a URL like: `https://your-app.up.railway.app`
+   - Copy this URL
+
+4. **Update Extension:**
+   - Open `Chrome/font-converter-api.js`
+   - Replace `API_URL` with your Railway URL:
+     ```javascript
+     const API_URL = 'https://your-app.up.railway.app';
+     ```
+   - Do the same in `Firefox/font-converter-api.js`
 
 ### Environment Variables
 
-- `PORT`: Server port (default: 3000)
+- `PORT`: Server port (Railway sets this automatically)
 
 ## Management UI
 
