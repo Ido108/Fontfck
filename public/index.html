@@ -322,6 +322,9 @@
         <button class="format-btn" onclick="convertTo('woff')" id="btn-woff">WOFF</button>
         <button class="format-btn" onclick="convertTo('woff2')" id="btn-woff2">WOFF2</button>
       </div>
+      <p style="text-align: center; color: #888; font-size: 14px; margin-top: 10px;">
+        Note: TTF and OTF both use SFNT format internally
+      </p>
     </div>
 
     <!-- Status Messages -->
@@ -409,16 +412,22 @@ Body: font (file), targetFormat (string)</code>
         }
 
         currentFormat = format;
-        document.getElementById('fileFormat').textContent = format.toUpperCase();
+        // Display user-friendly format name
+        const displayFormat = format === 'sfnt' ? 'TTF/OTF' : format.toUpperCase();
+        document.getElementById('fileFormat').textContent = displayFormat;
 
         // Show file info and conversion options
         fileInfo.classList.add('active');
         conversionSection.classList.add('active');
 
         // Disable button for current format
+        // Note: fontverter detects TTF/OTF as 'sfnt', so disable both if source is sfnt
         ['ttf', 'otf', 'woff', 'woff2'].forEach(fmt => {
           const btn = document.getElementById(`btn-${fmt}`);
           if (fmt === format) {
+            btn.disabled = true;
+            btn.textContent = `${fmt.toUpperCase()} (Current)`;
+          } else if (format === 'sfnt' && (fmt === 'ttf' || fmt === 'otf')) {
             btn.disabled = true;
             btn.textContent = `${fmt.toUpperCase()} (Current)`;
           } else {

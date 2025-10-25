@@ -108,12 +108,21 @@ app.post('/api/convert', upload.single('font'), async (req, res) => {
       return res.status(400).json({ error: 'Could not detect font format' });
     }
 
-    console.log(`Detected format: ${detectedFormat}, converting to ${targetFormat}`);
+    console.log(`Detected format: ${detectedFormat}, target format: ${targetFormat}`);
 
-    // Check if already in target format
-    const targetFontverterFormat = mapToFontverterFormat(targetFormat);
-    if (detectedFormat === targetFontverterFormat) {
-      console.log('Already in target format, returning original');
+    // Note: fontverter uses 'sfnt' for both TTF and OTF
+    // If source is sfnt and target is ttf/otf, they're the same - return original
+    if (detectedFormat === 'sfnt' && (targetFormat === 'ttf' || targetFormat === 'otf')) {
+      console.log('Already in SFNT format (TTF/OTF), returning original');
+      return res.set({
+        'Content-Type': `font/${targetFormat}`,
+        'Content-Disposition': `attachment; filename="font.${targetFormat}"`
+      }).send(req.file.buffer);
+    }
+
+    // Check if formats match exactly
+    if (detectedFormat === targetFormat) {
+      console.log('Source and target formats match, returning original');
       return res.set({
         'Content-Type': `font/${targetFormat}`,
         'Content-Disposition': `attachment; filename="font.${targetFormat}"`
@@ -173,11 +182,15 @@ app.post('/api/batch-convert', upload.array('fonts', 50), async (req, res) => {
         let outputBuffer;
         let converted = false;
 
-        const targetFontverterFormat = mapToFontverterFormat(targetFormat);
-
-        if (detectedFormat === targetFontverterFormat) {
+        // Check if already in target format
+        if (detectedFormat === 'sfnt' && (targetFormat === 'ttf' || targetFormat === 'otf')) {
+          // Already SFNT (TTF/OTF), return original
+          outputBuffer = file.buffer;
+        } else if (detectedFormat === targetFormat) {
+          // Exact match
           outputBuffer = file.buffer;
         } else {
+          // Convert
           outputBuffer = await convertFont(file.buffer, targetFormat);
           converted = true;
         }
