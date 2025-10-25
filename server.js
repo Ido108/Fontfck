@@ -33,13 +33,15 @@ const upload = multer({
 });
 
 // Supported formats (user-facing)
-const SUPPORTED_FORMATS = ['woff', 'woff2', 'ttf', 'otf'];
+// Note: fontverter only supports sfnt (TTF), woff, woff2
+// OTF is SFNT with CFF tables, fontverter treats it the same as TTF
+const SUPPORTED_FORMATS = ['woff', 'woff2', 'ttf'];
 
 // Map user formats to fontverter formats
-// fontverter uses: 'sfnt' (for TTF/OTF), 'woff', 'woff2'
+// fontverter accepts: 'sfnt', 'woff', 'woff2' (and 'truetype' as alias for 'sfnt')
 function mapToFontverterFormat(format) {
   if (format === 'ttf' || format === 'otf') return 'sfnt';
-  return format; // woff or woff2
+  return format; // woff, woff2, or already mapped
 }
 
 // Detect font format using fontverter
@@ -55,20 +57,19 @@ function detectFormat(buffer) {
 }
 
 // Convert font using fontverter
-async function convertFont(inputBuffer, targetFormat) {
+// Note: targetFontverterFormat should already be mapped to fontverter format (sfnt, woff, woff2)
+async function convertFont(inputBuffer, targetFontverterFormat) {
   try {
-    // Map user format to fontverter format
-    const fontverterFormat = mapToFontverterFormat(targetFormat);
-
-    console.log(`Converting to fontverter format: ${fontverterFormat}`);
+    console.log(`Converting using fontverter to: ${targetFontverterFormat}`);
 
     // Use fontverter.convert (auto-detects input format)
-    const outputBuffer = await fontverter.convert(inputBuffer, fontverterFormat);
+    // Valid formats: 'sfnt', 'woff', 'woff2' (or 'truetype' as alias for 'sfnt')
+    const outputBuffer = await fontverter.convert(inputBuffer, targetFontverterFormat);
 
     return outputBuffer;
 
   } catch (error) {
-    console.error('Conversion error:', error);
+    console.error('Fontverter conversion error:', error);
     throw error;
   }
 }
@@ -129,8 +130,8 @@ app.post('/api/convert', upload.single('font'), async (req, res) => {
       }).send(req.file.buffer);
     }
 
-    // Convert using fontverter
-    const outputBuffer = await convertFont(req.file.buffer, targetFormat);
+    // Convert using fontverter (map to fontverter format)
+    const outputBuffer = await convertFont(req.file.buffer, mapToFontverterFormat(targetFormat));
 
     // Send converted file
     res.set({
@@ -190,8 +191,8 @@ app.post('/api/batch-convert', upload.array('fonts', 50), async (req, res) => {
           // Exact match
           outputBuffer = file.buffer;
         } else {
-          // Convert
-          outputBuffer = await convertFont(file.buffer, targetFormat);
+          // Convert (map to fontverter format)
+          outputBuffer = await convertFont(file.buffer, mapToFontverterFormat(targetFormat));
           converted = true;
         }
 
