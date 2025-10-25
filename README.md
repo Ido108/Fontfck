@@ -100,10 +100,18 @@ Access the web interface at `http://localhost:3000` to:
 
 ## Supported Formats
 
+### Input Formats (Can Convert FROM):
 - **TTF** (TrueType Font)
 - **OTF** (OpenType Font)
 - **WOFF** (Web Open Font Format)
 - **WOFF2** (Web Open Font Format 2)
+
+### Output Formats (Can Convert TO):
+- **TTF** (TrueType Font) - uses 'truetype' in fontverter
+- **WOFF** (Web Open Font Format)
+- **WOFF2** (Web Open Font Format 2)
+
+**Note:** OTF files can be uploaded and converted FROM, but cannot be converted TO (fontverter limitation)
 
 ---
 

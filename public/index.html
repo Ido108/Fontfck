@@ -290,9 +290,9 @@
       <p><strong>Drag & Drop Font File Here</strong></p>
       <p>or</p>
       <label for="fileInput" class="file-label">Browse Files</label>
-      <input type="file" id="fileInput" accept=".ttf,.woff,.woff2">
+      <input type="file" id="fileInput" accept=".ttf,.otf,.woff,.woff2">
       <p style="font-size: 14px; color: #888; margin-top: 20px;">
-        Supported: TTF, WOFF, WOFF2
+        Supported: TTF, OTF, WOFF, WOFF2
       </p>
     </div>
 
@@ -368,14 +368,15 @@ Body: font (file), targetFormat (string)</code>
     }
 
     // Detect format from buffer
+    // Note: fontverter.detectFormat returns 'sfnt' for TTF/OTF, but we detect them separately for UI
     function detectFormat(buffer) {
       const view = new DataView(buffer);
       const signature = view.getUint32(0, false);
 
       if (signature === 0x774F4646) return 'woff';
       if (signature === 0x774F4632) return 'woff2';
-      if (signature === 0x00010000 || signature === 0x74727565) return 'ttf';
-      if (signature === 0x4F54544F) return 'otf';
+      if (signature === 0x00010000 || signature === 0x74727565) return 'sfnt'; // TTF
+      if (signature === 0x4F54544F) return 'sfnt'; // OTF (also SFNT)
 
       return null;
     }
@@ -406,13 +407,17 @@ Body: font (file), targetFormat (string)</code>
 
         const format = detectFormat(uploadedBuffer);
         if (!format) {
-          showStatus('Invalid font format! Only TTF, WOFF, WOFF2 are supported.', 'error');
+          showStatus('Invalid font format! Only TTF, OTF, WOFF, WOFF2 are supported.', 'error');
           return;
         }
 
         currentFormat = format;
         // Display user-friendly format name
-        const displayFormat = format === 'sfnt' ? 'TTF/OTF' : format.toUpperCase();
+        let displayFormat = format.toUpperCase();
+        if (format === 'sfnt') {
+          // fontverter detects TTF/OTF as 'sfnt'
+          displayFormat = 'TTF/OTF (SFNT)';
+        }
         document.getElementById('fileFormat').textContent = displayFormat;
 
         // Show file info and conversion options
@@ -435,8 +440,8 @@ Body: font (file), targetFormat (string)</code>
           }
         });
 
-        const formatDisplay = format === 'sfnt' ? 'TTF' : format.toUpperCase();
-        showStatus(`Font loaded successfully! Format: ${formatDisplay}`, 'success');
+        const formatDisplayMsg = format === 'sfnt' ? 'TTF/OTF (SFNT)' : format.toUpperCase();
+        showStatus(`Font loaded successfully! Format: ${formatDisplayMsg}`, 'success');
       };
 
       reader.onerror = () => {
