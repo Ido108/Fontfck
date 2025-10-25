@@ -452,7 +452,13 @@ Body: font (file), targetFormat (string)</code>
     }
 
     // Drag and drop handlers
-    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('click', (e) => {
+      // Don't trigger if clicking on the label (it already opens file dialog)
+      if (e.target.tagName === 'LABEL' || e.target.closest('label')) {
+        return;
+      }
+      fileInput.click();
+    });
     fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
 
     dropZone.addEventListener('dragover', (e) => {
