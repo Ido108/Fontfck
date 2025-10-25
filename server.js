@@ -21,13 +21,13 @@ const upload = multer({
     fileSize: 10 * 1024 * 1024 // 10MB limit
   },
   fileFilter: (req, file, cb) => {
-    const allowedFormats = ['.woff', '.woff2', '.ttf', '.otf'];
+    const allowedFormats = ['.woff', '.woff2', '.ttf'];
     const ext = path.extname(file.originalname).toLowerCase();
 
     if (allowedFormats.includes(ext)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid format. Only WOFF, WOFF2, TTF, OTF are supported.'));
+      cb(new Error('Invalid format. Only WOFF, WOFF2, TTF are supported.'));
     }
   }
 });

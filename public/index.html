@@ -290,9 +290,9 @@
       <p><strong>Drag & Drop Font File Here</strong></p>
       <p>or</p>
       <label for="fileInput" class="file-label">Browse Files</label>
-      <input type="file" id="fileInput" accept=".ttf,.otf,.woff,.woff2">
+      <input type="file" id="fileInput" accept=".ttf,.woff,.woff2">
       <p style="font-size: 14px; color: #888; margin-top: 20px;">
-        Supported: TTF, OTF, WOFF, WOFF2
+        Supported: TTF, WOFF, WOFF2
       </p>
     </div>
 
@@ -406,7 +406,7 @@ Body: font (file), targetFormat (string)</code>
 
         const format = detectFormat(uploadedBuffer);
         if (!format) {
-          showStatus('Invalid font format! Only TTF, OTF, WOFF, WOFF2 are supported.', 'error');
+          showStatus('Invalid font format! Only TTF, WOFF, WOFF2 are supported.', 'error');
           return;
         }
 
@@ -435,7 +435,8 @@ Body: font (file), targetFormat (string)</code>
           }
         });
 
-        showStatus(`Font loaded successfully! Format: ${format.toUpperCase()}`, 'success');
+        const formatDisplay = format === 'sfnt' ? 'TTF' : format.toUpperCase();
+        showStatus(`Font loaded successfully! Format: ${formatDisplay}`, 'success');
       };
 
       reader.onerror = () => {
