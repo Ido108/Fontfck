@@ -21,27 +21,28 @@ const upload = multer({
     fileSize: 10 * 1024 * 1024 // 10MB limit
   },
   fileFilter: (req, file, cb) => {
-    const allowedFormats = ['.woff', '.woff2', '.ttf'];
+    const allowedFormats = ['.woff', '.woff2', '.ttf', '.otf'];
     const ext = path.extname(file.originalname).toLowerCase();
 
     if (allowedFormats.includes(ext)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid format. Only WOFF, WOFF2, TTF are supported.'));
+      cb(new Error('Invalid format. Only WOFF, WOFF2, TTF, OTF are supported.'));
     }
   }
 });
 
 // Supported formats (user-facing)
-// Note: fontverter only supports sfnt (TTF), woff, woff2
-// OTF is SFNT with CFF tables, fontverter treats it the same as TTF
-const SUPPORTED_FORMATS = ['woff', 'woff2', 'ttf'];
+// Note: fontverter supports 'truetype' (TTF/OTF), 'woff', 'woff2'
+// OTF can be downloaded (original) but cannot be converted TO (only FROM)
+const SUPPORTED_FORMATS = ['woff', 'woff2', 'ttf', 'otf'];
 
 // Map user formats to fontverter formats
-// fontverter accepts: 'sfnt', 'woff', 'woff2' (and 'truetype' as alias for 'sfnt')
+// fontverter accepts: 'truetype', 'woff', 'woff2'
+// NOTE: Use 'truetype' NOT 'sfnt' - sfnt doesn't work as target!
 function mapToFontverterFormat(format) {
-  if (format === 'ttf' || format === 'otf') return 'sfnt';
-  return format; // woff, woff2, or already mapped
+  if (format === 'ttf' || format === 'otf') return 'truetype';
+  return format; // woff, woff2
 }
 
 // Detect font format using fontverter
